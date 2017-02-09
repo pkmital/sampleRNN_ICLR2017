@@ -9,7 +9,7 @@ THEANO_FLAGS=mode=FAST_RUN,device=gpu1,floatX=float32,lib.cnmem=.95 python model
 """
 import time
 from datetime import datetime
-print "Experiment started at:", datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
+print("Experiment started at:", datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
 exp_start = time.time()
 
 import os, sys
@@ -96,8 +96,8 @@ def get_args():
 
     # Create tag for this experiment based on passed args
     tag = reduce(lambda a, b: a+b, sys.argv).replace('--resume', '').replace('/', '-').replace('--', '-').replace('True', 'T').replace('False', 'F')
-    print "Created experiment tag for these args:"
-    print tag
+    print("Created experiment tag for these args:")
+    print(tag)
 
     return args, tag
 
@@ -339,9 +339,9 @@ def generate_and_save_samples(tag):
     total_time = time.time() - total_time
     log = "{} samples of {} seconds length generated in {} seconds."
     log = log.format(N_SEQS, N_SECS, total_time)
-    print log,
+    print(log, end=' ')
 
-    for i in xrange(N_SEQS):
+    for i in range(N_SEQS):
         samp = samples[i, num_prev_samples_to_use: ]
         if Q_TYPE == 'mu-law':
             from datasets.dataset import mu2linear
@@ -399,9 +399,9 @@ def monitor(data_feeder):
     return numpy.mean(_costs), _total_time
 
 
-print "Wall clock time spent before training started: {:.2f}h"\
-        .format((time.time()-exp_start)/3600.)
-print "Training!"
+print("Wall clock time spent before training started: {:.2f}h"\
+        .format((time.time()-exp_start)/3600.))
+print("Training!")
 total_iters = 0
 total_time = 0.
 last_print_time = 0.
@@ -437,30 +437,30 @@ if RESUME:
                                   test_nll_str])
     # At this point we saved the pkl file.
     last_print_iters = total_iters
-    print "### RESUMING JOB FROM EPOCH {}, ITER {}".format(epoch, total_iters)
+    print("### RESUMING JOB FROM EPOCH {}, ITER {}".format(epoch, total_iters))
     # Consumes this much iters to get to the last point in training data.
     consume_time = time.time()
-    for i in xrange(iters_to_consume):
-        tr_feeder.next()
+    for i in range(iters_to_consume):
+        next(tr_feeder)
     consume_time = time.time() - consume_time
-    print "Train data ready in {:.2f}secs after consuming {} minibatches.".\
-            format(consume_time, iters_to_consume)
+    print("Train data ready in {:.2f}secs after consuming {} minibatches.".\
+            format(consume_time, iters_to_consume))
 
     lib.load_params(res_path)
-    print "Parameters from last available checkpoint loaded from path {}".format(res_path)
+    print("Parameters from last available checkpoint loaded from path {}".format(res_path))
 
 test_time = 0.0
 
 while True:
     # THIS IS ONE ITERATION
     if total_iters % 500 == 0:
-        print total_iters,
+        print(total_iters, end=' ')
 
     total_iters += 1
 
     try:
         # Take as many mini-batches as possible from train set
-        mini_batch = tr_feeder.next()
+        mini_batch = next(tr_feeder)
     except StopIteration:
         # Mini-batches are finished. Load it again.
         # Basically, one epoch.
@@ -472,10 +472,10 @@ while True:
                                  Q_TYPE)
 
         # and start taking new mini-batches again.
-        mini_batch = tr_feeder.next()
+        mini_batch = next(tr_feeder)
         epoch += 1
         end_of_batch = True
-        print "[Another epoch]",
+        print("[Another epoch]", end=' ')
 
     seqs, reset, mask = mini_batch
 
@@ -498,19 +498,19 @@ while True:
         (TRAIN_MODE=='time-iters' and total_time-last_print_time >= PRINT_TIME) or \
         (TRAIN_MODE=='iters-time' and total_iters-last_print_iters >= PRINT_ITERS) or \
         end_of_batch:
-        print "\nValidation!",
+        print("\nValidation!", end=' ')
         valid_cost, valid_time = monitor(valid_feeder)
-        print "Done!"
+        print("Done!")
 
         # Only when the validation cost is improved get the cost for test set.
         if valid_cost < lowest_valid_cost:
             lowest_valid_cost = valid_cost
-            print "\n>>> Best validation cost of {} reached. Testing!"\
-                    .format(valid_cost),
+            print("\n>>> Best validation cost of {} reached. Testing!"\
+                    .format(valid_cost), end=' ')
             test_cost, test_time = monitor(test_feeder)
-            print "Done!"
+            print("Done!")
             # Report last one which is the lowest on validation set:
-            print ">>> test cost:{}\ttotal time:{}".format(test_cost, test_time)
+            print(">>> test cost:{}\ttotal time:{}".format(test_cost, test_time))
             corresponding_test_cost = test_cost
             new_lowest_cost = True
 
@@ -532,7 +532,7 @@ while True:
                                        valid_time/3600,
                                        test_cost,
                                        test_time/3600)
-        print print_info
+        print(print_info)
 
         # Save and graph training progress
         x_axis_str = 'iter'
@@ -550,14 +550,14 @@ while True:
                          'test time' : test_time,
                          'wall clock time' : time.time()-exp_start}
         lib.save_training_info(training_info, FOLDER_PREFIX)
-        print "Train info saved!",
+        print("Train info saved!", end=' ')
 
         y_axis_strs = [train_nll_str, valid_nll_str, test_nll_str]
         lib.plot_traing_info(x_axis_str, y_axis_strs, FOLDER_PREFIX)
-        print "Plotted!"
+        print("Plotted!")
 
         # Generate and save samples
-        print "Sampling!",
+        print("Sampling!", end=' ')
         tag = "e{}_i{}_t{:.2f}_tr{:.4f}_v{:.4f}"
         tag = tag.format(epoch,
                          total_iters,
@@ -567,13 +567,13 @@ while True:
         tag += ("_best" if new_lowest_cost else "")
         # Generate samples
         generate_and_save_samples(tag)
-        print "Done!"
+        print("Done!")
 
         # Save params of model
         lib.save_params(
                 os.path.join(PARAMS_PATH, 'params_{}.pkl'.format(tag))
         )
-        print "Params saved!"
+        print("Params saved!")
 
         if total_iters-last_print_iters == PRINT_ITERS \
             or total_time-last_print_time >= PRINT_TIME:
@@ -586,16 +586,16 @@ while True:
         end_of_batch = False
         new_lowest_cost = False
 
-        print "Validation Done!\nBack to Training..."
+        print("Validation Done!\nBack to Training...")
 
     if (TRAIN_MODE=='iters' and total_iters == STOP_ITERS) or \
        (TRAIN_MODE=='time' and total_time >= STOP_TIME) or \
        ((TRAIN_MODE=='time-iters' or TRAIN_MODE=='iters-time') and \
             (total_iters == STOP_ITERS or total_time >= STOP_TIME)):
 
-        print "Done! Total iters:", total_iters, "Total time: ", total_time
-        print "Experiment ended at:", datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
-        print "Wall clock time spent: {:.2f}h"\
-                    .format((time.time()-exp_start)/3600)
+        print("Done! Total iters:", total_iters, "Total time: ", total_time)
+        print("Experiment ended at:", datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
+        print("Wall clock time spent: {:.2f}h"\
+                    .format((time.time()-exp_start)/3600))
 
         sys.exit()

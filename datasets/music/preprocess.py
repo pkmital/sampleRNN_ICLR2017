@@ -4,8 +4,8 @@ import subprocess
 RAW_DATA_DIR=str(sys.argv[1])
 OUTPUT_DIR=os.path.join(RAW_DATA_DIR, "parts")
 os.makedirs(OUTPUT_DIR)
-print RAW_DATA_DIR
-print OUTPUT_DIR
+print(RAW_DATA_DIR)
+print(OUTPUT_DIR)
 
 # Step 1: write all filenames to a list
 with open(os.path.join(OUTPUT_DIR, 'preprocess_file_list.txt'), 'w') as f:
@@ -20,7 +20,7 @@ os.system("ffmpeg -f concat -safe 0 -i {}/preprocess_file_list.txt {}/preprocess
 length = float(subprocess.check_output('ffprobe -i {}/preprocess_all_audio.wav -show_entries format=duration -v quiet -of csv="p=0"'.format(OUTPUT_DIR), shell=True))
 
 # # Step 3: split the big file into 8-second chunks
-for i in xrange(int(length)//8 - 1):
+for i in range(int(length)//8 - 1):
     os.system('ffmpeg -ss {} -t 8 -i {}/preprocess_all_audio.wav -ac 1 -ab 16k -ar 16000 {}/p{}.flac'.format(i, OUTPUT_DIR, OUTPUT_DIR, i))
 
 # # Step 4: clean up temp files

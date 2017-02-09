@@ -153,7 +153,7 @@ def __fixed_shuffle(inp_list):
 
 def __make_random_batches(inp_list, batch_size):
     batches = []
-    for i in xrange(len(inp_list) / batch_size):
+    for i in range(len(inp_list) / batch_size):
         batches.append(inp_list[i*batch_size:(i+1)*batch_size])
 
     __fixed_shuffle(batches)
@@ -226,7 +226,7 @@ def __blizz_feed_epoch(files,
             mask
         ], axis=1)
 
-        for i in xrange(batch_seq_len // seq_len):
+        for i in range(batch_seq_len // seq_len):
             reset = numpy.int32(i==0)
             subbatch = batch[:, i*seq_len : (i+1)*seq_len + overlap]
             submask = mask[:, i*seq_len : (i+1)*seq_len + overlap]
@@ -347,7 +347,7 @@ def __music_feed_epoch(files,
             mask
         ], axis=1)
 
-        for i in xrange(batch_seq_len // seq_len):
+        for i in range(batch_seq_len // seq_len):
             reset = numpy.int32(i==0)
             subbatch = batch[:, i*seq_len : (i+1)*seq_len + overlap]
             submask = mask[:, i*seq_len : (i+1)*seq_len + overlap]
@@ -473,7 +473,7 @@ def __huck_feed_epoch(files,
             mask
         ], axis=1)
 
-        for i in xrange(batch_seq_len // seq_len):
+        for i in range(batch_seq_len // seq_len):
             reset = numpy.int32(i==0)
             subbatch = batch[:, i*seq_len : (i+1)*seq_len + overlap]
             submask = mask[:, i*seq_len : (i+1)*seq_len + overlap]

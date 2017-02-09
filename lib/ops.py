@@ -6,6 +6,7 @@ different sources. (Ask me if the source is not indicated)
 """
 
 import os, sys
+from functools import reduce
 sys.path.append(os.getcwd())
 sys.path.insert(1, '../')
 import lib
@@ -175,7 +176,7 @@ def Batchnorm(
     if axes is not None:
         dimshuffle_pattern = [
             'x' if i in axes else 0
-            for i in xrange(inputs.ndim)
+            for i in range(inputs.ndim)
         ]
         return T.nnet.bn.batch_normalization(
             inputs,
@@ -229,7 +230,7 @@ def MLP(name, input_dim, hidden_dim, output_dim, n_layers, inputs, batchnorm=Tru
         batchnorm=batchnorm
     )
 
-    for i in xrange(1, n_layers-2):
+    for i in range(1, n_layers-2):
         output = ReLULayer(
             name+'.Hidden'+str(i),
             input_dim=hidden_dim,
@@ -258,7 +259,7 @@ def Embedding(name, n_symbols, output_dim, indices):
 
     output_shape = [
         indices.shape[i]
-        for i in xrange(indices.ndim)
+        for i in range(indices.ndim)
     ] + [output_dim]
 
     return vectors[indices.flatten()].reshape(output_shape)
@@ -285,7 +286,7 @@ def __Recurrent(name, hidden_dims, step_fn, inputs, non_sequences=[], h0s=None):
     if h0s is None:
         h0s = [None]*len(hidden_dims)
 
-    for i in xrange(len(hidden_dims)):
+    for i in range(len(hidden_dims)):
         if h0s[i] is None:
             h0_unbatched = lib.param(
                 name + '.h0_' + str(i),
@@ -613,7 +614,7 @@ def stackedGRU(
     :usage:
         >>> TODO
     """
-    assert n_rnn in xrange(1, 6), "n_rnn should be in [1,2,3,4,5]"
+    assert n_rnn in range(1, 6), "n_rnn should be in [1,2,3,4,5]"
     assert not(n_rnn == 1 and skip_conn == True),\
             "Single layer RNN cannot have skip connections"
 
@@ -803,7 +804,7 @@ def stackedLSTM(
     :usage:
         >>> TODO
     """
-    assert n_rnn in xrange(1, 6), "n_rnn should be in [1,2,3,4,5]"
+    assert n_rnn in range(1, 6), "n_rnn should be in [1,2,3,4,5]"
     assert not(n_rnn == 1 and skip_conn == True),\
             "Single layer RNN cannot have skip connections"
 
@@ -1135,7 +1136,7 @@ def T_one_hot(inp_tensor, n_classes):
     flattened = inp_tensor.flatten()
     z = T.zeros((flattened.shape[0], n_classes), dtype=theano.config.floatX)
     one_hot = T.set_subtensor(z[T.arange(flattened.shape[0]), flattened], 1)
-    out_shape = [inp_tensor.shape[i] for i in xrange(inp_tensor.ndim)] + [n_classes]
+    out_shape = [inp_tensor.shape[i] for i in range(inp_tensor.ndim)] + [n_classes]
     one_hot = one_hot.reshape(out_shape)
     return one_hot
 
